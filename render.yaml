@@ -22,7 +22,7 @@ services:
   # Frontend Static Site
   - type: static
     name: internship-frontend
-    env: static
+    env: static site
     plan: free
     rootDir: internship-placement-system/frontend
     buildCommand: npm install; npm run build
