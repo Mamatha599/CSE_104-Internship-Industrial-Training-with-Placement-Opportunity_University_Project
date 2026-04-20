@@ -20,9 +20,9 @@ services:
         sync: false # Set this to your frontend URL later
 
   # Frontend Static Site
-  - type: web
+  - type: static_site
     name: internship-frontend
-    env: static
+    env: static 
     plan: free
     rootDir: internship-placement-system/frontend
     buildCommand: npm install; npm run build
