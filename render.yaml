@@ -20,7 +20,7 @@ services:
         sync: false # Set this to your frontend URL later
 
   # Frontend Static Site
-  - type: static_site
+  - type: web
     name: internship-frontend
     env: static 
     plan: free
