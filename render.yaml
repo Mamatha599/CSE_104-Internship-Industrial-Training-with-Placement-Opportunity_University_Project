@@ -4,29 +4,27 @@ services:
     name: internship-backend
     env: node
     plan: free
-    rootDir: internship-placement-system/backend
+    rootDir: backend
     buildCommand: npm install
     startCommand: npm start
     envVars:
       - key: PORT
-        value: 5000
+        value: "5000"
       - key: NODE_ENV
         value: production
       - key: MONGODB_URI
-        sync: false # Set this in Render dashboard
+        sync: false
       - key: JWT_SECRET
-        sync: false # Set this in Render dashboard
+        sync: false
       - key: CLIENT_URL
-        sync: false # Set this to your frontend URL later
+        sync: false
 
   # Frontend Static Site
-  - type: web
+  - type: static_site
     name: internship-frontend
-    env: static 
-    plan: free
-    rootDir: internship-placement-system/frontend
+    rootDir: frontend
     buildCommand: npm install; npm run build
     publishDir: dist
     envVars:
       - key: VITE_API_URL
-        sync: false # Set this to your backend URL + /api/v1
+        sync: false
