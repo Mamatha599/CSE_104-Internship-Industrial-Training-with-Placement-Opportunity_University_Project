@@ -49,7 +49,8 @@ const getMyApplications = async (req, res, next) => {
         }
 
         const { type } = req.query;
-        const applications = await applicationService.getStudentApplications(student._id, type || null);
+        const normalizedType = type ? type.toUpperCase() : null;
+        const applications = await applicationService.getStudentApplications(student._id, normalizedType);
 
         res.status(200).json({
             success: true,
@@ -66,7 +67,8 @@ const getMyApplications = async (req, res, next) => {
 const getAll = async (req, res, next) => {
     try {
         const { type } = req.query;
-        const applications = await applicationService.getAllApplications(type || null);
+        const normalizedType = type ? type.toUpperCase() : null;
+        const applications = await applicationService.getAllApplications(normalizedType);
         res.status(200).json({
             success: true,
             data: applications,
@@ -306,18 +308,24 @@ const submitExternalInternship = async (req, res, next) => {
  */
 const getMyInternships = async (req, res, next) => {
     try {
+        console.log(`[DASHBOARD_DEBUG] Fetching internships for user ID: ${req.user.id}`);
         const student = await studentService.getProfile(req.user.id);
         if (!student) {
+            console.error(`[DASHBOARD_DEBUG] Student profile NOT FOUND for user ID: ${req.user.id}`);
             return res.status(404).json({ success: false, message: 'Student profile not found' });
         }
 
+        console.log(`[DASHBOARD_DEBUG] Profile found: ${student._id}. Querying applications...`);
         const internships = await applicationService.getStudentInternships(student._id);
+        
+        console.log(`[DASHBOARD_DEBUG] Found ${internships.length} internship applications for student ${student._id}`);
 
         res.status(200).json({
             success: true,
             data: internships,
         });
     } catch (error) {
+        console.error(`[DASHBOARD_DEBUG] Critical error: ${error.message}`);
         next(error);
     }
 };

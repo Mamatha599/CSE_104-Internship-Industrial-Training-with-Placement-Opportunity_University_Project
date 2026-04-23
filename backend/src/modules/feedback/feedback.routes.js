@@ -16,7 +16,7 @@ const submitFeedback = async (req, res, next) => {
             { 
                 $set: { 
                     'feedback.facultyFeedback': facultyFeedback,
-                    'internshipStatus': 'Completed' 
+                    'internshipStatus': 'COMPLETED' 
                 } 
             },
             { new: true }

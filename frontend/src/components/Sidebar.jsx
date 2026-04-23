@@ -7,41 +7,44 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Detect if user is inside placement or internship portal based on URL
-    const isPlacementPortal = location.pathname.startsWith('/placement');
-    const isInternshipPortal = location.pathname.startsWith('/internship');
+    const currentPath = location.pathname;
+    
+    // Determine active portal based on current path
+    const isPlacementPath = currentPath.startsWith('/placement') || currentPath.includes('type=PLACEMENT');
+    const isInternshipPath = currentPath.startsWith('/internship') || currentPath.includes('type=INTERNSHIP');
 
-    // Portal-aware student menus
-    const studentDefaultMenu = [
+    // Navigation Items
+    const commonStudentItems = [
         { path: '/', label: 'Portal Select', icon: '🏠' },
-        { path: '/placement', label: 'Placements', icon: '💼' },
-        { path: '/internship', label: 'Internships', icon: '🎓' },
         { path: '/profile', label: 'Profile', icon: '👤' },
         { path: '/notifications', label: 'Notifications', icon: '🔔' },
     ];
 
     const studentPlacementMenu = [
-        { path: '/', label: 'Portal Select', icon: '🏠' },
-        { path: '/placement', label: 'Dashboard', icon: '📊' },
-        { path: '/opportunities', label: 'Opportunities', icon: '💼' },
-        { path: '/my-applications', label: 'Applications', icon: '📂' },
-        { path: '/profile', label: 'Profile', icon: '👤' },
-        { path: '/notifications', label: 'Notifications', icon: '🔔' },
+        { path: '/placement', label: 'Placement Hub', icon: '📊' },
+        { path: '/opportunities?type=PLACEMENT', label: 'Job Openings', icon: '💼' },
+        { path: '/my-applications?type=PLACEMENT', label: 'My Applications', icon: '📂' },
+        { path: '/internship', label: 'Switch to Internships', icon: '🎓', secondary: true },
     ];
 
     const studentInternshipMenu = [
-        { path: '/', label: 'Portal Select', icon: '🏠' },
-        { path: '/internship', label: 'Dashboard', icon: '📊' },
-        { path: '/profile', label: 'Profile', icon: '👤' },
-        { path: '/notifications', label: 'Notifications', icon: '🔔' },
+        { path: '/internship', label: 'Internship Hub', icon: '📊' },
+        { path: '/opportunities?type=INTERNSHIP', label: 'Internship Openings', icon: '💼' },
+        { path: '/my-applications?type=INTERNSHIP', label: 'Approval History', icon: '📂' },
+        { path: '/placement', label: 'Switch to Placements', icon: '💼', secondary: true },
+    ];
+
+    const studentDefaultMenu = [
+        { path: '/placement', label: 'Placement Portal', icon: '💼' },
+        { path: '/internship', label: 'Internship Portal', icon: '🎓' },
     ];
 
     const menuItems = {
-        student: isPlacementPortal
-            ? studentPlacementMenu
-            : isInternshipPortal
-                ? studentInternshipMenu
-                : studentDefaultMenu,
+        student: isPlacementPath 
+            ? [...commonStudentItems.slice(0,1), ...studentPlacementMenu, ...commonStudentItems.slice(1)]
+            : isInternshipPath
+                ? [...commonStudentItems.slice(0,1), ...studentInternshipMenu, ...commonStudentItems.slice(1)]
+                : [...commonStudentItems, ...studentDefaultMenu],
         recruiter: [
             { path: '/', label: 'Overview', icon: '📊' },
             { path: '/opportunities', label: 'Offerings', icon: '📄' },
@@ -62,24 +65,21 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             { path: '/notifications', label: 'Institutional Alerts', icon: '🔔' },
         ],
         coordinator: [
-            { path: '/', label: 'Coordination Hub', icon: '🎓' },
-            { path: '/analytics', label: 'Dept Analytics', icon: '📈' },
+            { path: '/', label: 'Coordinator Hub', icon: '🎓' },
             { path: '/academic-profile', label: 'Portal Profile', icon: '👤' },
-            { path: '/opportunities', label: 'Workflow Management', icon: '🏢' },
+            { path: '/my-applications', label: 'Approval History', icon: '📜' },
             { path: '/notifications', label: 'System Alerts', icon: '🔔' },
         ],
         hod: [
-            { path: '/', label: 'Departmental Hub', icon: '🎓' },
-            { path: '/analytics', label: 'Analytics Insights', icon: '📈' },
+            { path: '/', label: 'Department Hub', icon: '🎓' },
             { path: '/academic-profile', label: 'HOD Profile', icon: '👤' },
-            { path: '/opportunities', label: 'Approval Gateway', icon: '🏢' },
+            { path: '/my-applications', label: 'Dept History', icon: '📜' },
             { path: '/notifications', label: 'Admin Alerts', icon: '🔔' },
         ],
         dean: [
             { path: '/', label: 'Executive Hub', icon: '🎓' },
-            { path: '/analytics', label: 'Institutional Trends', icon: '📈' },
             { path: '/academic-profile', label: 'Executive Profile', icon: '👤' },
-            { path: '/opportunities', label: 'Final Approvals', icon: '🏢' },
+            { path: '/my-applications', label: 'Final Approvals', icon: '📜' },
             { path: '/notifications', label: 'Executive Alerts', icon: '🔔' },
         ]
     };
@@ -91,12 +91,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
     const currentMenu = menuItems[user?.role] || [];
 
-    // Determine portal indicator for sidebar header
-    const portalLabel = isPlacementPortal
-        ? 'Placement'
-        : isInternshipPortal
-            ? 'Internship'
-            : null;
+    const portalLabel = isPlacementPath ? 'Placement' : isInternshipPath ? 'Internship' : null;
 
     return (
         <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
@@ -126,7 +121,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             <nav className="sidebar-menu">
                 <ul>
                     {currentMenu.map((item) => (
-                        <li key={item.path + item.label}>
+                        <li key={item.path + item.label} className={item.secondary ? 'secondary-nav-item' : ''}>
                             <NavLink
                                 to={item.path}
                                 className={({ isActive }) => isActive ? 'active' : ''}

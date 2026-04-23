@@ -12,6 +12,8 @@ const analyticsRoutes = require('../modules/analytics/analytics.routes');
 const exportRoutes = require('../modules/export/export.routes');
 const documentRoutes = require('../modules/document/document.routes');
 const feedbackRoutes = require('../modules/feedback/feedback.routes');
+const interviewRoutes = require('../modules/interview/interview.routes');
+const notificationRoutes = require('../modules/notification/notification.routes');
 
 const deanRoutes = require('./dean.routes');
 const hodRoutes = require('./hod.routes');
@@ -36,6 +38,8 @@ router.use('/analytics', analyticsRoutes);
 router.use('/export', exportRoutes);
 router.use('/document', documentRoutes);
 router.use('/feedback', feedbackRoutes);
+router.use('/interview', interviewRoutes);
+router.use('/notification', notificationRoutes);
 
 // Internship alias — now points to the new approval system
 router.use('/internship', approvalRoutes);

@@ -15,7 +15,7 @@ const applicationSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: ['APPLIED', 'SHORTLISTED', 'REJECTED', 'SELECTED', 'APPROVED', 'PENDING APPROVAL'],
+            enum: ['APPLIED', 'SHORTLISTED', 'REJECTED', 'SELECTED', 'APPROVED', 'PENDING_APPROVAL', 'COMPLETED'],
             default: 'APPLIED',
         },
         matchScore: {
@@ -50,8 +50,8 @@ const applicationSchema = new mongoose.Schema(
         // ── Portal & Workflow Fields ──────────────────────────────────────
         type: {
             type: String,
-            enum: ['Placement', 'Internship'],
-            default: 'Placement',
+            enum: ['PLACEMENT', 'INTERNSHIP'],
+            default: 'PLACEMENT',
         },
         workflowType: {
             type: String,
@@ -60,14 +60,14 @@ const applicationSchema = new mongoose.Schema(
         },
         internshipSource: {
             type: String,
-            enum: ['College', 'External'],
+            enum: ['COLLEGE', 'EXTERNAL'],
             default: null,
         },
 
         // ── Internship Lifecycle Fields ───────────────────────────────────
         internshipStatus: {
             type: String,
-            enum: ['Pending Approval', 'Approved', 'In Progress', 'Completed', null],
+            enum: ['PENDING_APPROVAL', 'APPROVED', 'IN_PROGRESS', 'COMPLETED', null],
             default: null,
         },
         facultyApproved: {
@@ -127,22 +127,22 @@ const applicationSchema = new mongoose.Schema(
         // ── Multi-Level Approval Flow ───────────────────────────────────
         approvalFlow: {
             faculty: {
-                status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
+                status: { type: String, enum: ['PENDING', 'APPROVED', 'REJECTED'], default: 'PENDING' },
                 remarks: { type: String, default: '' },
                 approvedAt: { type: Date, default: null },
             },
             coordinator: {
-                status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
+                status: { type: String, enum: ['PENDING', 'APPROVED', 'REJECTED'], default: 'PENDING' },
                 remarks: { type: String, default: '' },
                 approvedAt: { type: Date, default: null },
             },
             hod: {
-                status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
+                status: { type: String, enum: ['PENDING', 'APPROVED', 'REJECTED'], default: 'PENDING' },
                 remarks: { type: String, default: '' },
                 approvedAt: { type: Date, default: null },
             },
             dean: {
-                status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
+                status: { type: String, enum: ['PENDING', 'APPROVED', 'REJECTED'], default: 'PENDING' },
                 remarks: { type: String, default: '' },
                 approvedAt: { type: Date, default: null },
             },
@@ -154,14 +154,24 @@ const applicationSchema = new mongoose.Schema(
         },
         finalStatus: {
             type: String,
-            enum: ['Approved', 'Rejected', 'Pending'],
-            default: 'Pending',
+            enum: ['APPROVED', 'REJECTED', 'PENDING'],
+            default: 'PENDING',
         },
     },
     {
         timestamps: true,
     }
 );
+
+// Pre-save hook to ensure uppercase enums
+applicationSchema.pre('save', function(next) {
+    if (this.type) this.type = this.type.toUpperCase();
+    if (this.status) this.status = this.status.toUpperCase();
+    if (this.workflowType) this.workflowType = this.workflowType.toUpperCase();
+    if (this.internshipStatus) this.internshipStatus = this.internshipStatus.toUpperCase();
+    next();
+});
+
 
 // Prevent duplicate applications: one student can apply to one opportunity only once
 // Only enforce when opportunityId is present (not for external internships)

@@ -37,6 +37,12 @@ const OpportunityList = () => {
     }, [user]);
 
     useEffect(() => {
+        const active = localStorage.getItem('activePortal');
+        if (active === 'placement') setTypeFilter('PLACEMENT');
+        else if (active === 'internship') setTypeFilter('INTERNSHIP');
+    }, []);
+
+    useEffect(() => {
         if (user) {
             console.log(`Fetching opportunities for ${user.role} with scope: ${viewScope}`);
             fetchOpportunities();
@@ -141,8 +147,10 @@ const OpportunityList = () => {
             const isExpired = isJobExpired(job.deadline);
             const isApplied = job.isApplied;
 
-            const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                company.toLowerCase().includes(searchQuery.toLowerCase());
+            const search = searchQuery.toLowerCase().trim();
+            const matchesSearch = !search || 
+                title.toLowerCase().includes(search) ||
+                company.toLowerCase().includes(search);
 
             const matchesType = typeFilter === 'ALL' ||
                 (jType && jType.toUpperCase() === typeFilter.toUpperCase());
@@ -152,9 +160,9 @@ const OpportunityList = () => {
 
             let matchesStatus = true;
             if (statusFilter === 'OPEN') matchesStatus = !isExpired && (job.isActive !== false);
-            if (statusFilter === 'CLOSED') matchesStatus = isExpired || (job.isActive === false);
-            if (statusFilter === 'APPLIED') matchesStatus = !!isApplied;
-            if (statusFilter === 'NOT_APPLIED') matchesStatus = !isApplied;
+            else if (statusFilter === 'CLOSED') matchesStatus = isExpired || (job.isActive === false);
+            else if (statusFilter === 'APPLIED') matchesStatus = !!isApplied;
+            else if (statusFilter === 'NOT_APPLIED') matchesStatus = !isApplied;
 
             return !!(matchesSearch && matchesType && matchesVisibility && matchesStatus);
         })

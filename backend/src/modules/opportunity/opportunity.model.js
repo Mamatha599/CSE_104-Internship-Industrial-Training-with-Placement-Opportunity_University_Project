@@ -42,7 +42,7 @@ const opportunitySchema = new mongoose.Schema(
         },
         type: {
             type: String,
-            enum: ['internship', 'placement'],
+            enum: ['INTERNSHIP', 'PLACEMENT'],
             required: [true, 'Opportunity type is required'],
         },
         visibility: {

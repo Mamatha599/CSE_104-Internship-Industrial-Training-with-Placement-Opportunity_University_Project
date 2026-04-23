@@ -6,7 +6,35 @@ const Student = require('./student.model');
  * @returns {Promise<Object>} - Student profile
  */
 const getProfile = async (userId) => {
-    return await Student.findOne({ userId });
+    console.log(`[DEBUG] Attempting to find student profile for userId: ${userId}`);
+    const profile = await Student.findOne({ userId });
+    if (profile) {
+        console.log(`[DEBUG] Found student profile: ${profile._id} for user: ${userId}`);
+    } else {
+        console.warn(`[DEBUG] No student profile found for userId: ${userId}`);
+    }
+    return profile;
+};
+
+/**
+ * Ensure a student profile exists for a user (Self-healing)
+ */
+const ensureProfile = async (userId, email) => {
+    let profile = await Student.findOne({ userId });
+    if (!profile) {
+        console.log(`[SELF_HEAL] Creating missing student profile for ${email}`);
+        // Generate a temporary unique roll number if missing
+        const tempRoll = `TEMP-${Date.now().toString().slice(-6)}`;
+        profile = new Student({
+            userId,
+            name: email.split('@')[0].toUpperCase(),
+            rollNumber: tempRoll,
+            department: 'UNDECIDED',
+            year: new Date().getFullYear()
+        });
+        await profile.save();
+    }
+    return profile;
 };
 
 /**
@@ -52,6 +80,7 @@ const getAllStudents = async () => {
 
 module.exports = {
     getProfile,
+    ensureProfile,
     createProfile,
     updateProfile,
     getAllStudents,

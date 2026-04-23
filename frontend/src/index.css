@@ -1143,3 +1143,173 @@ body {
   font-weight: 600;
   font-size: 0.9rem;
 }
+
+/* ────────────────────────────────────────────────────────────────────────────
+   RESPONSIVENESS OVERHAUL
+   ──────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+  :root {
+    --sidebar-width: 260px;
+  }
+  
+  .page-container {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 280px;
+  }
+
+  .dashboard-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: calc(-1 * var(--sidebar-width));
+    top: 0;
+    bottom: 0;
+    height: 100vh;
+    width: var(--sidebar-width);
+    z-index: 2000;
+    box-shadow: 10px 0 30px rgba(0,0,0,0.2);
+    border-right: none;
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+
+  /* Overlay for when sidebar is open */
+  .sidebar.open::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 51, 102, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: -1;
+    left: var(--sidebar-width);
+    width: calc(100vw - var(--sidebar-width));
+  }
+
+  .main-content {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .main-header {
+    padding: 0 1rem;
+    height: 70px;
+  }
+
+  .header-left h1 {
+    font-size: 1rem !important;
+  }
+
+  .header-left p {
+    display: none;
+  }
+
+  .header-right {
+    gap: 0.75rem;
+  }
+
+  .user-name, .user-role-badge {
+    display: none;
+  }
+
+  .mobile-sidebar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: var(--bg-main);
+    border-radius: 8px;
+    color: var(--primary);
+    font-size: 1.25rem;
+    margin-right: 0.5rem;
+  }
+
+  /* Grid Stackers */
+  .stat-grid, 
+  .dashboard-grid, 
+  .portal-selector-grid,
+  [style*="grid-template-columns: repeat(4, 1fr)"],
+  [style*="grid-template-columns: repeat(3, 1fr)"] {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  [style*="grid-template-columns: repeat(auto-fill, minmax(350px, 1fr))"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Banner Adjustments */
+  .linways-profile-banner {
+    flex-direction: column;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    gap: 1.5rem;
+  }
+
+  .linways-avatar-container {
+    width: 100px;
+    height: 100px;
+  }
+
+  .linways-profile-details h2 {
+    font-size: 1.5rem;
+  }
+
+  /* Table Responsiveness */
+  .table-container {
+    margin: 0 -1rem;
+    width: calc(100% + 2rem);
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  /* Quick Actions */
+  .quick-actions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Modal Adjustments */
+  .modal-content {
+    width: 95% !important;
+    padding: 1.5rem !important;
+    margin: 1rem;
+  }
+
+  /* Buttons */
+  .btn-primary, .btn-outline {
+    width: 100%;
+    padding: 0.85rem 1rem;
+  }
+
+  /* Specific Dashboard Flex Fixes */
+  [style*="display: flex; justify-content: space-between; alignItems: flex-end"] {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-container {
+    padding: 1rem;
+  }
+
+  .linways-card {
+    padding: 1.25rem;
+  }
+
+  .stat-card-value {
+    font-size: 1.75rem !important;
+  }
+}

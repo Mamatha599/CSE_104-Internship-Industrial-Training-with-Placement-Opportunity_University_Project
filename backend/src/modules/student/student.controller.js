@@ -120,17 +120,21 @@ const uploadResume = async (req, res, next) => {
  */
 const getOwnProfile = async (req, res, next) => {
     try {
+        console.log(`[PROFILE_DEBUG] Getting profile for user: ${req.user.id}`);
         const profile = await studentService.getProfile(req.user.id);
 
         if (!profile) {
+            console.error(`[PROFILE_DEBUG] Profile NOT FOUND for user: ${req.user.id}`);
             return res.status(404).json({ success: false, message: 'Profile not found' });
         }
 
+        console.log(`[PROFILE_DEBUG] Profile found: ${profile._id} for user: ${req.user.id}`);
         res.status(200).json({
             success: true,
             data: profile,
         });
     } catch (error) {
+        console.error(`[PROFILE_DEBUG] Error: ${error.message}`);
         next(error);
     }
 };

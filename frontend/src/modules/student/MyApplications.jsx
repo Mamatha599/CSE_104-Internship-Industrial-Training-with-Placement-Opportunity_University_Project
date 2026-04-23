@@ -159,7 +159,7 @@ const MyApplications = () => {
                                                 {(() => {
                                                     const hasApproval = approvals.find(a => a.applicationId === app._id || a.applicationId?._id === app._id);
                                                     const isSelected = (app.status || '').toUpperCase() === 'SELECTED';
-                                                    const isInternship = app.type === 'Internship';
+                                                    const isInternship = (app.type || '').toUpperCase() === 'INTERNSHIP';
 
                                                     if (hasApproval) {
                                                         return (
@@ -206,7 +206,7 @@ const MyApplications = () => {
                         <div style={{ padding: '2rem' }}>
                             <div style={{ marginBottom: '2rem', padding: '1rem', background: '#eff6ff', borderRadius: '12px' }}>
                                 <p style={{ fontWeight: '1000', color: 'var(--primary)', fontSize: '1rem' }}>{selectedApp?.opportunityId?.companyName?.toUpperCase()}</p>
-                                <p style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-muted)' }}>{selectedApp?.opportunityId?.title} • {selectedApp?.type}</p>
+                                <p style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-muted)' }}>{selectedApp?.opportunityId?.title} • {selectedApp?.type?.toUpperCase()}</p>
                             </div>
                             {fetchingTimeline ? (
                                 <div style={{ textAlign: 'center', padding: '2rem' }}>Loading journey...</div>

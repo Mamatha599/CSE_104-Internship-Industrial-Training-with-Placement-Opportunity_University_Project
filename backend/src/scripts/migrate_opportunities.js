@@ -14,10 +14,10 @@ const migrate = async () => {
             const updates = {};
             
             // Normalize type
-            if (opp.type === 'Internship') {
-                updates.type = 'internship';
-            } else if (opp.type === 'Placement') {
-                updates.type = 'placement';
+            if (opp.type && opp.type.toUpperCase() === 'INTERNSHIP') {
+                updates.type = 'INTERNSHIP';
+            } else if (opp.type && opp.type.toUpperCase() === 'PLACEMENT') {
+                updates.type = 'PLACEMENT';
             }
 
             // Set default visibility

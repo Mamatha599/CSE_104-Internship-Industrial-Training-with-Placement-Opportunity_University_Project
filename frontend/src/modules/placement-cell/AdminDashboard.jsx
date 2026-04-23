@@ -18,6 +18,7 @@ const AdminDashboard = () => {
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [studentSearch, setStudentSearch] = useState('');
     const [appSearch, setAppSearch] = useState('');
+    const [activeTab, setActiveTab] = useState('STUDENTS'); // NEW: Tab system
     const navigate = useNavigate();
 
     // Export Logic
@@ -112,7 +113,7 @@ const AdminDashboard = () => {
         </div>
     );
 
-    const statusOptions = ['APPLIED', 'SHORTLISTED', 'SELECTED', 'REJECTED'];
+    const statusOptions = ['APPLIED', 'SHORTLISTED', 'SELECTED', 'REJECTED', 'APPROVED', 'PENDING_APPROVAL', 'COMPLETED'];
     const roleOptions = ['student', 'faculty', 'coordinator', 'hod', 'dean', 'recruiter', 'admin'];
 
     return (
@@ -132,296 +133,289 @@ const AdminDashboard = () => {
                     + INITIALIZE OPPORTUNITY
                 </button>
             </header>
-
-            {/* Statistics Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1.25rem', marginBottom: '2.5rem' }}>
-                <div className="linways-card" style={{ borderTop: '4px solid var(--primary)' }}>
-                    <div className="linways-card-header">
-                        <h4>TOTAL STUDENTS</h4>
+            {/* Statistics Section - Consolidated */}
+            <div style={{ background: '#f8fafc', padding: '2rem', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '3rem' }}>
+                <h3 style={{ fontSize: '0.85rem', fontWeight: '900', color: 'var(--text-muted)', marginBottom: '1.5rem', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
+                    Institutional Metrics & Performance
+                </h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
+                    <div className="linways-card" style={{ padding: '1.5rem', background: '#fff' }}>
+                        <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: '800', marginBottom: '0.5rem' }}>TOTAL CANDIDATES</div>
+                        <div style={{ fontSize: '1.75rem', fontWeight: '1000', color: 'var(--primary)' }}>{stats.totalStudents}</div>
                     </div>
-                    <div style={{ fontSize: '2rem', fontWeight: '950', color: 'var(--text-main)' }}>{stats.totalStudents}</div>
-                    <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>Registered Candidates</p>
-                </div>
-                <div className="linways-card" style={{ borderTop: '4px solid #3b82f6' }}>
-                    <div className="linways-card-header">
-                        <h4>OPPORTUNITIES</h4>
+                    <div className="linways-card" style={{ padding: '1.5rem', background: '#fff' }}>
+                        <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: '800', marginBottom: '0.5rem' }}>OPPORTUNITIES</div>
+                        <div style={{ fontSize: '1.75rem', fontWeight: '1000', color: '#2563eb' }}>{stats.totalOpportunities}</div>
                     </div>
-                    <div style={{ fontSize: '2rem', fontWeight: '950', color: '#3b82f6' }}>{stats.totalOpportunities}</div>
-                    <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>Active Listings</p>
-                </div>
-                <div className="linways-card" style={{ borderTop: '4px solid #f59e0b' }}>
-                    <div className="linways-card-header">
-                        <h4>APPLICATIONS</h4>
+                    <div className="linways-card" style={{ padding: '1.5rem', background: '#fff' }}>
+                        <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: '800', marginBottom: '0.5rem' }}>APPLICATIONS</div>
+                        <div style={{ fontSize: '1.75rem', fontWeight: '1000', color: '#d97706' }}>{stats.totalApplications}</div>
                     </div>
-                    <div style={{ fontSize: '2rem', fontWeight: '950', color: '#f59e0b' }}>{stats.totalApplications}</div>
-                    <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>Submissions Received</p>
-                </div>
-                <div className="linways-card" style={{ borderTop: '4px solid #10b981' }}>
-                    <div className="linways-card-header">
-                        <h4>PLACED STUDENTS</h4>
+                    <div className="linways-card" style={{ padding: '1.5rem', background: '#fff' }}>
+                        <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: '800', marginBottom: '0.5rem' }}>SUCCESSFUL PLACEMENTS</div>
+                        <div style={{ fontSize: '1.75rem', fontWeight: '1000', color: '#059669' }}>{stats.totalPlacedStudents}</div>
                     </div>
-                    <div style={{ fontSize: '2rem', fontWeight: '950', color: '#10b981' }}>{stats.totalPlacedStudents}</div>
-                    <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>Hired via Portal</p>
-                </div>
-                {/* Selection Rate - NEW METRIC */}
-                <div className="linways-card" style={{ borderTop: '4px solid #8b5cf6', background: 'linear-gradient(135deg, #ffffff 0%, #f5f3ff 100%)' }}>
-                    <div className="linways-card-header">
-                        <h4 style={{ color: '#8b5cf6' }}>SELECTION RATE</h4>
-                    </div>
-                    <div style={{ fontSize: '2rem', fontWeight: '950', color: '#8b5cf6' }}>
-                        {stats.analytics?.selectionRate || '0'}<span style={{ fontSize: '0.8rem' }}>%</span>
-                    </div>
-                    <p style={{ fontSize: '0.65rem', color: '#7c3aed', marginTop: '0.5rem', fontWeight: '700' }}>Pipeline Efficiency</p>
                 </div>
 
-                {/* Approval Rate */}
-                <div className="linways-card" style={{ borderTop: '4px solid #10b981', background: 'linear-gradient(135deg, #ffffff 0%, #ecfdf5 100%)' }}>
-                    <div className="linways-card-header">
-                        <h4 style={{ color: '#059669' }}>APPROVAL RATE</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span style={{ fontSize: '0.65rem', fontWeight: '850', color: 'var(--text-muted)' }}>SELECTION RATE</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div style={{ flex: 1, height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
+                                <div style={{ width: `${stats.analytics?.selectionRate || 0}%`, height: '100%', background: '#8b5cf6' }}></div>
+                            </div>
+                            <span style={{ fontWeight: '900', color: '#8b5cf6', fontSize: '0.9rem' }}>{stats.analytics?.selectionRate || 0}%</span>
+                        </div>
                     </div>
-                    <div style={{ fontSize: '2rem', fontWeight: '950', color: '#059669' }}>
-                        {stats.analytics?.approvalRate || '0'}<span style={{ fontSize: '0.8rem' }}>%</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span style={{ fontSize: '0.65rem', fontWeight: '850', color: 'var(--text-muted)' }}>APPROVAL EFFICIENCY</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div style={{ flex: 1, height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
+                                <div style={{ width: `${stats.analytics?.approvalRate || 0}%`, height: '100%', background: '#10b981' }}></div>
+                            </div>
+                            <span style={{ fontWeight: '900', color: '#10b981', fontSize: '0.9rem' }}>{stats.analytics?.approvalRate || 0}%</span>
+                        </div>
                     </div>
-                    <p style={{ fontSize: '0.65rem', color: '#059669', marginTop: '0.5rem', fontWeight: '700' }}>Institutional Success</p>
-                </div>
-
-                {/* ADVANCED ANALYTICS LINK */}
-                <div 
-                    onClick={() => navigate('/analytics')}
-                    className="linways-card" 
-                    style={{ 
-                        borderTop: '4px solid var(--primary)', 
-                        background: 'var(--primary)', 
-                        cursor: 'pointer',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        color: 'white',
-                        transition: 'transform 0.2s ease'
-                    }}
-                >
-                    <div style={{ fontSize: '2rem', marginBottom: '4px' }}>📈</div>
-                    <div style={{ fontWeight: '900', fontSize: '0.8rem', letterSpacing: '1px' }}>VIEW FULL ANALYTICS</div>
-                    <p style={{ fontSize: '0.6rem', opacity: 0.8 }}>Deep Institutional Insights</p>
-                </div>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.25rem', marginBottom: '2.5rem' }}>
-                <div className="linways-card" style={{ borderLeft: '4px solid #ef4444' }}>
-                    <div className="linways-card-header"><h4>PENDING APPROVALS (GLOBAL)</h4></div>
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                        <div style={{ fontSize: '2.5rem', fontWeight: '1000', color: '#ef4444' }}>{stats.analytics?.approvalPending || 0}</div>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '700' }}>REQUESTS AWAITING SIGNATURE</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0 1rem', borderLeft: '1px solid #e2e8f0' }}>
+                        <div>
+                            <div style={{ fontSize: '0.6rem', fontWeight: '900', color: '#ef4444' }}>PENDING</div>
+                            <div style={{ fontSize: '1.25rem', fontWeight: '1000', color: '#ef4444' }}>{stats.analytics?.approvalPending || 0}</div>
+                        </div>
+                        <div style={{ fontSize: '0.6rem', fontWeight: '800', color: 'var(--text-muted)', lineHeight: '1.2' }}>SIGNATURES<br/>REQUIRED</div>
                     </div>
-                </div>
-                <div className="linways-card" style={{ borderLeft: '4px solid var(--primary)' }}>
-                    <div className="linways-card-header"><h4>COMPLETED INTERNSHIPS</h4></div>
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                        <div style={{ fontSize: '2.5rem', fontWeight: '1000', color: 'var(--primary)' }}>{stats.analytics?.approvalCompleted || 0}</div>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '700' }}>TOTAL FINALIZED</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0 1rem', borderLeft: '1px solid #e2e8f0' }}>
+                        <div>
+                            <div style={{ fontSize: '0.6rem', fontWeight: '900', color: 'var(--primary)' }}>COMPLETED</div>
+                            <div style={{ fontSize: '1.25rem', fontWeight: '1000', color: 'var(--primary)' }}>{stats.analytics?.approvalCompleted || 0}</div>
+                        </div>
+                        <div style={{ fontSize: '0.6rem', fontWeight: '800', color: 'var(--text-muted)', lineHeight: '1.2' }}>INTERNSHIPS<br/>FINALIZED</div>
                     </div>
                 </div>
             </div>
 
-            {/* ══ User Role Management ═════════════════════════════════════════ */}
-            <div className="linways-card" style={{ marginBottom: '2.5rem' }}>
-                <div className="linways-card-header">
-                    <h4>USER ROLE MANAGEMENT</h4>
-                </div>
-                <div className="table-container" style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>EMAIL</th>
-                                <th>CURRENT ROLE</th>
-                                <th>CHANGE ROLE</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {users.map(u => (
-                                <tr key={u._id}>
-                                    <td>{u.email}</td>
-                                    <td>
-                                        <span className="badge" style={{ background: '#e2e8f0', color: '#475569', fontWeight: '800' }}>
-                                            {u.role?.toUpperCase()}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <select 
-                                            value={u.role}
-                                            onChange={(e) => handleRoleUpdate(u._id, e.target.value)}
-                                            style={{ padding: '0.3rem', borderRadius: '4px', fontSize: '0.8rem' }}
-                                        >
-                                            {roleOptions.map(r => <option key={r} value={r}>{r}</option>)}
-                                        </select>
-                                    </td>
+            {/* ══ Management Hub Tab Navigation ════════════════════════════════ */}
+            <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem', borderBottom: '2px solid #f1f5f9' }}>
+                {[
+                    { id: 'STUDENTS', label: 'I. Mentorship Registry', icon: '👨‍🎓' },
+                    { id: 'APPLICATIONS', label: 'II. Pipeline Monitor', icon: '🛰️' },
+                    { id: 'ROLES', label: 'III. Security & Roles', icon: '🛡️' }
+                ].map(tab => (
+                    <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        style={{
+                            padding: '1rem 0',
+                            background: 'none',
+                            border: 'none',
+                            borderBottom: activeTab === tab.id ? '2px solid var(--primary)' : '2px solid transparent',
+                            color: activeTab === tab.id ? 'var(--primary)' : 'var(--text-muted)',
+                            fontWeight: '900',
+                            fontSize: '0.8rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            transition: 'all 0.2s',
+                            marginBottom: '-2px'
+                        }}
+                    >
+                        <span>{tab.icon}</span>
+                        {tab.label.toUpperCase()}
+                    </button>
+                ))}
+            </div>
+
+            {/* ══ Tab Content ══════════════════════════════════════════════════ */}
+            
+            {activeTab === 'ROLES' && (
+                <div className="linways-card" style={{ animation: 'fadeIn 0.3s ease-in-out' }}>
+                    <div className="linways-card-header">
+                        <h4>SYSTEM ACCESS CONTROL</h4>
+                        <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Modify institutional privileges and administrative roles.</p>
+                    </div>
+                    <div className="table-container" style={{ maxHeight: '500px', overflowY: 'auto' }}>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>EMAIL</th>
+                                    <th>CURRENT PRIVILEGE</th>
+                                    <th>REASSIGN ROLE</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {users.map(u => (
+                                    <tr key={u._id}>
+                                        <td style={{ fontWeight: '600' }}>{u.email}</td>
+                                        <td>
+                                            <span className="badge" style={{ background: '#f1f5f9', color: 'var(--primary)', fontWeight: '850', fontSize: '0.65rem' }}>
+                                                {u.role?.toUpperCase()}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <select 
+                                                value={u.role}
+                                                onChange={(e) => handleRoleUpdate(u._id, e.target.value)}
+                                                style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.8rem', border: '1px solid #e2e8f0', fontWeight: '700' }}
+                                            >
+                                                {roleOptions.map(r => <option key={r} value={r}>{r}</option>)}
+                                            </select>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
+            )}
 
-            {/* ══ Faculty Mentor Assignment ═══════════════════════════════════ */}
-            <div className="linways-card" style={{ marginBottom: '2.5rem' }}>
-                <div className="linways-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h4>FACULTY MENTOR ASSIGNMENT</h4>
-                    <div style={{ display: 'flex', gap: '1rem' }}>
+            {activeTab === 'STUDENTS' && (
+                <div className="linways-card" style={{ animation: 'fadeIn 0.3s ease-in-out' }}>
+                    <div className="linways-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                            <h4>INSTITUTIONAL REGISTRY</h4>
+                            <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Map students to faculty mentors and export records.</p>
+                        </div>
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <input 
+                                type="text" 
+                                placeholder="Search Name/Roll..." 
+                                value={studentSearch}
+                                onChange={(e) => setStudentSearch(e.target.value)}
+                                style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.85rem', width: '250px' }}
+                            />
+                            <button 
+                                onClick={() => handleExport('students')}
+                                className="btn-outline"
+                                style={{ padding: '0.5rem 1.25rem', fontSize: '0.75rem', fontWeight: '850' }}
+                            >
+                                📥 EXPORT CSV
+                            </button>
+                        </div>
+                    </div>
+                    <div className="table-container" style={{ maxHeight: '500px', overflowY: 'auto' }}>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>CANDIDATE IDENTIFICATION</th>
+                                    <th>ASSIGNED MENTOR</th>
+                                    <th>FACULTY REASSIGNMENT</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {students
+                                    .filter(s => 
+                                        s.name.toLowerCase().includes(studentSearch.toLowerCase()) || 
+                                        s.rollNumber.toLowerCase().includes(studentSearch.toLowerCase())
+                                    )
+                                    .map(s => {
+                                        const currentMentor = users.find(u => u._id === s.assignedFaculty);
+                                        const facultyUsers = users.filter(u => u.role === 'faculty');
+                                        
+                                        return (
+                                            <tr key={s._id}>
+                                                <td>
+                                                    <div style={{ fontWeight: '850', color: 'var(--primary)', fontSize: '0.9rem' }}>{s.name?.toUpperCase()}</div>
+                                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '700' }}>{s.rollNumber} • {s.department}</div>
+                                                </td>
+                                                <td>
+                                                    {currentMentor ? (
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }}></div>
+                                                            <span style={{ fontWeight: '700', fontSize: '0.85rem' }}>{currentMentor.email}</span>
+                                                        </div>
+                                                    ) : (
+                                                        <span style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: '800' }}>⚠️ UNASSIGNED</span>
+                                                    )}
+                                                </td>
+                                                <td>
+                                                    <select 
+                                                        value={s.assignedFaculty || ''}
+                                                        onChange={(e) => handleFacultyAssign(s._id, e.target.value)}
+                                                        style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.8rem', border: '1px solid #e2e8f0', fontWeight: '700' }}
+                                                    >
+                                                        <option value="">Choose Mentor...</option>
+                                                        {facultyUsers.map(f => (
+                                                            <option key={f._id} value={f._id}>{f.email}</option>
+                                                        ))}
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'APPLICATIONS' && (
+                <div className="linways-card" style={{ animation: 'fadeIn 0.3s ease-in-out' }}>
+                    <div className="linways-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                            <h4>APPLICATION JOURNEY TRACKER</h4>
+                            <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Monitor real-time recruitment statuses and manually override cycles.</p>
+                        </div>
                         <input 
                             type="text" 
-                            placeholder="Search Student/Roll No..." 
-                            value={studentSearch}
-                            onChange={(e) => setStudentSearch(e.target.value)}
-                            style={{ padding: '0.4rem 1rem', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem' }}
+                            placeholder="Filter company/student..." 
+                            value={appSearch}
+                            onChange={(e) => setAppSearch(e.target.value)}
+                            style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.85rem', width: '300px' }}
                         />
-                        <button 
-                            onClick={() => handleExport('students')}
-                            className="btn-outline"
-                            style={{ padding: '0.4rem 1rem', fontSize: '0.75rem', fontWeight: '800' }}
-                        >
-                            ⬇ EXPORT REGISTRY
-                        </button>
                     </div>
-                </div>
-                <div className="table-container" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>STUDENT</th>
-                                <th>CURRENT MENTOR</th>
-                                <th>ASSIGN NEW MENTOR</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {students
-                                .filter(s => 
-                                    s.name.toLowerCase().includes(studentSearch.toLowerCase()) || 
-                                    s.rollNumber.toLowerCase().includes(studentSearch.toLowerCase())
-                                )
-                                .map(s => {
-                                    const currentMentor = users.find(u => u._id === s.assignedFaculty);
-                                    const facultyUsers = users.filter(u => u.role === 'faculty');
-                                    
-                                    return (
-                                        <tr key={s._id}>
+                    <div className="table-container" style={{ maxHeight: '500px', overflowY: 'auto' }}>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>CANDIDATE</th>
+                                    <th>OPPORTUNITY</th>
+                                    <th>PROGRESSION STATE</th>
+                                    <th>ADMIN OVERRIDE</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {applications
+                                    .filter(app => 
+                                        app.studentId?.name?.toLowerCase().includes(appSearch.toLowerCase()) || 
+                                        app.opportunityId?.companyName?.toLowerCase().includes(appSearch.toLowerCase())
+                                    )
+                                    .map(app => (
+                                        <tr key={app._id}>
                                             <td>
-                                                <div style={{ fontWeight: '700' }}>{s.name}</div>
-                                                <div style={{ fontSize: '0.7rem' }}>{s.rollNumber}</div>
+                                                <div style={{ fontWeight: '800', color: 'var(--text-main)' }}>{app.studentId?.name}</div>
+                                                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: '700' }}>{app.studentId?.rollNumber}</div>
                                             </td>
                                             <td>
-                                                {currentMentor ? (
-                                                    <span style={{ fontWeight: '600', color: 'var(--success)' }}>{currentMentor.email}</span>
-                                                ) : (
-                                                    <span style={{ color: 'var(--text-muted)' }}>Not Assigned</span>
-                                                )}
+                                                <div style={{ fontWeight: '900', color: 'var(--primary)', fontSize: '0.85rem' }}>{app.opportunityId?.companyName?.toUpperCase()}</div>
+                                                <div style={{ fontSize: '0.7rem', fontWeight: '700' }}>{app.opportunityId?.title}</div>
+                                            </td>
+                                            <td>
+                                                <span className={`badge badge-${app.status?.toLowerCase().replace(' ', '-') || 'applied'}`} style={{
+                                                    fontSize: '0.65rem', fontWeight: '900', padding: '4px 14px', borderRadius: '4px',
+                                                    textTransform: 'uppercase', letterSpacing: '0.8px'
+                                                }}>
+                                                    {app.status}
+                                                </span>
                                             </td>
                                             <td>
                                                 <select 
-                                                    value={s.assignedFaculty || ''}
-                                                    onChange={(e) => handleFacultyAssign(s._id, e.target.value)}
-                                                    style={{ padding: '0.3rem', borderRadius: '4px', fontSize: '0.8rem' }}
+                                                    value={app.status} 
+                                                    disabled={updatingId === app._id}
+                                                    onChange={(e) => handleStatusUpdate(app._id, e.target.value)}
+                                                    style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.8rem', border: '1px solid #e2e8f0', fontWeight: '700', background: '#fff' }}
                                                 >
-                                                    <option value="">Select Faculty...</option>
-                                                    {facultyUsers.map(f => (
-                                                        <option key={f._id} value={f._id}>{f.email}</option>
+                                                    {statusOptions.map(opt => (
+                                                        <option key={opt} value={opt}>{opt}</option>
                                                     ))}
                                                 </select>
                                             </td>
                                         </tr>
-                                    );
-                                })}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            {/* Applications Management Table */}
-            <div className="linways-card">
-                <div className="linways-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <h4>MONITOR APPLICATIONS</h4>
-                        <input 
-                            type="text" 
-                            placeholder="Filter by Student/Company..." 
-                            value={appSearch}
-                            onChange={(e) => setAppSearch(e.target.value)}
-                            style={{ padding: '0.4rem 1rem', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem' }}
-                        />
+                                    ))}
+                            </tbody>
+                        </table>
                     </div>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '700' }}>TOTAL {applications.length} SUBMISSIONS</span>
                 </div>
-                <div className="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>STUDENT NAME</th>
-                                <th>COMPANY</th>
-                                <th>ROLE</th>
-                                <th>CURRENT STATUS</th>
-                                <th>UPDATE LIFECYCLE</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {applications
-                                .filter(app => 
-                                    app.studentId?.name?.toLowerCase().includes(appSearch.toLowerCase()) || 
-                                    app.opportunityId?.companyName?.toLowerCase().includes(appSearch.toLowerCase())
-                                )
-                                .map(app => (
-                                    <tr key={app._id}>
-                                    <td>
-                                        <div style={{ fontWeight: '700', color: 'var(--text-main)' }}>{app.studentId?.name || 'Unknown Student'}</div>
-                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{app.studentId?.rollNumber} • {app.studentId?.department}</div>
-                                    </td>
-                                    <td>
-                                        <strong style={{ color: 'var(--primary)' }}>{app.opportunityId?.companyName?.toUpperCase()}</strong>
-                                    </td>
-                                    <td>
-                                        <span style={{ fontWeight: '600' }}>{app.opportunityId?.title}</span>
-                                    </td>
-                                    <td>
-                                        <span className={`badge badge-${app.status?.toLowerCase().replace(' ', '-') || 'applied'}`} style={{
-                                            fontSize: '0.7rem', fontWeight: '800', padding: '4px 12px', borderRadius: '999px',
-                                            textTransform: 'uppercase', letterSpacing: '0.5px'
-                                        }}>
-                                            {app.status}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <select 
-                                            value={app.status} 
-                                            disabled={updatingId === app._id}
-                                            onChange={(e) => handleStatusUpdate(app._id, e.target.value)}
-                                            style={{
-                                                padding: '0.4rem 0.8rem',
-                                                borderRadius: '8px',
-                                                border: '1px solid #e2e8f0',
-                                                fontSize: '0.8rem',
-                                                fontWeight: '600',
-                                                background: '#f8fafc',
-                                                cursor: 'pointer',
-                                                outline: 'none'
-                                            }}
-                                        >
-                                            {statusOptions.map(opt => (
-                                                <option key={opt} value={opt}>{opt}</option>
-                                            ))}
-                                        </select>
-                                    </td>
-                                </tr>
-                            ))}
-                            {applications.length === 0 && (
-                                <tr>
-                                    <td colSpan="5" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-                                        No applications found in the system.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            )}
         </div>
     );
 };

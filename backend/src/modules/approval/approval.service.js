@@ -14,10 +14,12 @@ const createRequest = async (studentId, data) => {
         throw new Error('Application not found');
     }
 
-    // Check if selected (case-insensitive for both 'Selected' and 'SELECTED')
+    // Check if selected or external pending (case-insensitive)
     const currentStatus = (application.status || '').toUpperCase();
-    if (currentStatus !== 'SELECTED') {
-        throw new Error('Approval can only be requested after selection (SELECTED status)');
+    const isExternalPending = application.internshipSource === 'EXTERNAL' && currentStatus === 'PENDING_APPROVAL';
+    
+    if (currentStatus !== 'SELECTED' && !isExternalPending) {
+        throw new Error('Approval can only be requested after selection (SELECTED status) or for External submissions.');
     }
 
     // 2. Prevent duplicate requests
@@ -44,6 +46,23 @@ const createRequest = async (studentId, data) => {
             remarks: 'Submitted internship approval request with offer letter',
             timestamp: new Date()
         }]
+    });
+
+    // SYNC WITH PARENT APPLICATION
+    await Application.findByIdAndUpdate(applicationId, {
+        $set: { 
+            status: 'PENDING_APPROVAL',
+            internshipStatus: 'PENDING_APPROVAL'
+        },
+        $push: {
+            history: {
+                status: 'PENDING_APPROVAL',
+                updatedBy: studentId,
+                updatedByModel: 'Student',
+                remarks: 'Submitted internship approval request',
+                timestamp: new Date()
+            }
+        }
     });
 
     return await newRequest.save();
@@ -166,7 +185,8 @@ const updateStatus = async (requestId, userId, action, remarks = '') => {
 
     // SYNC WITH PARENT APPLICATION
     const appUpdate = {
-        $set: {}
+        $set: {},
+        $push: {}
     };
 
     if (action === 'REJECT') {
@@ -179,13 +199,14 @@ const updateStatus = async (requestId, userId, action, remarks = '') => {
         };
         const currentLevel = levelMap[request.history[request.history.length - 2].status];
         if (currentLevel) {
-            appUpdate.$set[`approvalFlow.${currentLevel}.status`] = 'Rejected';
+            appUpdate.$set[`approvalFlow.${currentLevel}.status`] = 'REJECTED';
             appUpdate.$set[`approvalFlow.${currentLevel}.remarks`] = remarks;
         }
-        appUpdate.$set.finalStatus = 'Rejected';
+        appUpdate.$set.finalStatus = 'REJECTED';
         appUpdate.$set.status = 'REJECTED'; // Return to student
+        appUpdate.$set.internshipStatus = 'REJECTED';
     } else if (flowLevel) {
-        appUpdate.$set[`approvalFlow.${flowLevel}.status`] = 'Approved';
+        appUpdate.$set[`approvalFlow.${flowLevel}.status`] = 'APPROVED';
         appUpdate.$set[`approvalFlow.${flowLevel}.remarks`] = remarks;
         appUpdate.$set[`approvalFlow.${flowLevel}.approvedAt`] = new Date();
         
@@ -199,11 +220,24 @@ const updateStatus = async (requestId, userId, action, remarks = '') => {
         appUpdate.$set.currentApprovalLevel = nextLevelMap[flowLevel];
         
         if (flowLevel === 'dean') {
-            appUpdate.$set.finalStatus = 'Approved';
+            appUpdate.$set.finalStatus = 'APPROVED';
             appUpdate.$set.status = 'COMPLETED';
-            appUpdate.$set.internshipStatus = 'Completed';
+            appUpdate.$set.internshipStatus = 'COMPLETED';
+        } else {
+            // Ensure status reflects active progress
+            appUpdate.$set.status = 'APPROVED';
+            appUpdate.$set.internshipStatus = 'IN_PROGRESS';
         }
     }
+
+    // Always push status update to history for synchronization
+    appUpdate.$push.history = {
+        status: nextStatus,
+        updatedBy: userId,
+        updatedByModel: 'User',
+        remarks: remarks || `${action === 'REJECT' ? 'Rejected' : 'Approved'} at this level`,
+        timestamp: new Date()
+    };
 
     await Application.findByIdAndUpdate(request.applicationId, appUpdate);
 

@@ -22,7 +22,7 @@ const applyForOpportunity = async (studentId, opportunityId) => {
     const application = new Application({
         studentId: student._id,
         opportunityId,
-        type: opportunity.type === 'internship' ? 'Internship' : 'Placement',
+        type: opportunity.type === 'INTERNSHIP' ? 'INTERNSHIP' : 'PLACEMENT',
         status: 'APPLIED',
         matchScore,
         history: [{
@@ -248,10 +248,11 @@ const submitExternalInternship = async (studentId, data) => {
     const application = new Application({
         studentId: studentId,
         opportunityId: null,
-        type: 'Internship',
+        type: 'INTERNSHIP',
         workflowType: 'INTERNSHIP_FLOW',
-        internshipSource: 'External',
-        status: 'SELECTED',
+        internshipSource: 'EXTERNAL',
+        status: 'PENDING_APPROVAL',
+        internshipStatus: 'PENDING_APPROVAL',
         companyName: data.companyName,
         role: data.role,
         duration: data.duration,
@@ -259,10 +260,10 @@ const submitExternalInternship = async (studentId, data) => {
         offerLetterURL: data.offerLetterURL || '',
         startDate: data.startDate || null,
         history: [{
-            status: 'SELECTED',
+            status: 'PENDING_APPROVAL',
             updatedBy: studentId,
             updatedByModel: 'Student',
-            remarks: 'External internship submitted (Pre-selected)',
+            remarks: 'External internship submitted for approval',
             timestamp: new Date()
         }]
     });
@@ -290,7 +291,7 @@ const submitExternalInternship = async (studentId, data) => {
  * Get all internship applications for a specific student
  */
 const getStudentInternships = async (studentId) => {
-    return await Application.find({ studentId, type: 'Internship' })
+    return await Application.find({ studentId, type: 'INTERNSHIP' })
         .populate('opportunityId')
         .sort({ appliedAt: -1 });
 };
@@ -337,7 +338,7 @@ const completeInternship = async (applicationId) => {
         {
             $set: {
                 status: 'COMPLETED',
-                internshipStatus: 'Completed',
+                internshipStatus: 'COMPLETED',
             }
         },
         { new: true }

@@ -16,6 +16,17 @@ const RecruiterDashboard = () => {
     const [opportunities, setOpportunities] = useState([]);
     const [message, setMessage] = useState('');
 
+    // Scheduling State
+    const [schedulingApp, setSchedulingApp] = useState(null);
+    const [scheduleData, setScheduleData] = useState({
+        title: 'Technical Interview',
+        date: '',
+        startTime: '',
+        endTime: '',
+        location: '',
+        meetingUrl: ''
+    });
+
     useEffect(() => {
         fetchData();
     }, []);
@@ -78,6 +89,22 @@ const RecruiterDashboard = () => {
             fetchData();
         } catch (err) {
             console.error(err);
+        }
+    };
+
+    const handleSchedule = async (e) => {
+        e.preventDefault();
+        try {
+            await api.post('/interview/schedule', {
+                ...scheduleData,
+                applicationId: schedulingApp._id
+            });
+            setMessage(`Interview scheduled for ${schedulingApp.studentId?.name}`);
+            setSchedulingApp(null);
+            setScheduleData({ title: 'Technical Interview', date: '', startTime: '', endTime: '', location: '', meetingUrl: '' });
+        } catch (err) {
+            console.error(err);
+            alert('Failed to schedule interview');
         }
     };
 
@@ -235,14 +262,24 @@ const RecruiterDashboard = () => {
                                                 </button>
                                             )}
                                             {app.status === 'SHORTLISTED' && (
-                                                <button 
-                                                    className="btn-primary" 
-                                                    disabled={updatingId === app._id}
-                                                    onClick={() => handleSelect(app._id)}
-                                                    style={{ padding: '4px 10px', fontSize: '0.72rem', fontWeight: '850', background: '#059669' }}
-                                                >
-                                                    SELECT
-                                                </button>
+                                                <>
+                                                    <button 
+                                                        className="btn-primary" 
+                                                        disabled={updatingId === app._id}
+                                                        onClick={() => setSchedulingApp(app)}
+                                                        style={{ padding: '4px 10px', fontSize: '0.72rem', fontWeight: '850', background: 'var(--primary)' }}
+                                                    >
+                                                        SCHEDULE
+                                                    </button>
+                                                    <button 
+                                                        className="btn-primary" 
+                                                        disabled={updatingId === app._id}
+                                                        onClick={() => handleSelect(app._id)}
+                                                        style={{ padding: '4px 10px', fontSize: '0.72rem', fontWeight: '850', background: '#059669' }}
+                                                    >
+                                                        SELECT
+                                                    </button>
+                                                </>
                                             )}
                                             <button 
                                                 className="btn-outline" 
@@ -265,8 +302,109 @@ const RecruiterDashboard = () => {
                     </table>
                 </div>
             </div>
+
+            {/* Scheduling Modal */}
+            {schedulingApp && (
+                <div className="modal-overlay" style={{ backdropFilter: 'blur(8px)', background: 'rgba(30,27,75,0.4)' }} onClick={() => setSchedulingApp(null)}>
+                    <div className="modal-content" style={{ padding: '2.5rem', borderRadius: '24px', maxWidth: '500px' }} onClick={e => e.stopPropagation()}>
+                        <h2 style={{ fontSize: '1.5rem', fontWeight: '950', marginBottom: '0.5rem', color: 'var(--text-main)' }}>SCHEDULE INTERVIEW</h2>
+                        <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.85rem' }}>
+                            Setting up engagement for <strong style={{color: 'var(--primary)'}}>{schedulingApp.studentId?.name?.toUpperCase()}</strong>
+                        </p>
+                        
+                        <form onSubmit={handleSchedule} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <div>
+                                <label style={labelStyle}>Interview Title</label>
+                                <input 
+                                    style={inputStyle} 
+                                    value={scheduleData.title} 
+                                    onChange={e => setScheduleData({...scheduleData, title: e.target.value})}
+                                    required 
+                                />
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
+                                <div>
+                                    <label style={labelStyle}>Date</label>
+                                    <input 
+                                        type="date" 
+                                        style={inputStyle} 
+                                        value={scheduleData.date} 
+                                        onChange={e => setScheduleData({...scheduleData, date: e.target.value})}
+                                        required 
+                                    />
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div>
+                                        <label style={labelStyle}>Start Time</label>
+                                        <input 
+                                            type="time" 
+                                            style={inputStyle} 
+                                            value={scheduleData.startTime} 
+                                            onChange={e => setScheduleData({...scheduleData, startTime: e.target.value})}
+                                            required 
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={labelStyle}>End Time</label>
+                                        <input 
+                                            type="time" 
+                                            style={inputStyle} 
+                                            value={scheduleData.endTime} 
+                                            onChange={e => setScheduleData({...scheduleData, endTime: e.target.value})}
+                                            required 
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Location / Instructions (Simple Text)</label>
+                                <input 
+                                    style={inputStyle} 
+                                    placeholder="e.g. Office Room 302 or Online"
+                                    value={scheduleData.location} 
+                                    onChange={e => setScheduleData({...scheduleData, location: e.target.value})}
+                                    required 
+                                />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Meeting Link (Optional)</label>
+                                <input 
+                                    style={inputStyle} 
+                                    placeholder="Zoom / Google Meet URL"
+                                    value={scheduleData.meetingUrl} 
+                                    onChange={e => setScheduleData({...scheduleData, meetingUrl: e.target.value})}
+                                />
+                            </div>
+                            
+                            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                                <button type="button" className="btn-outline" style={{ flex: 1, padding: '0.8rem' }} onClick={() => setSchedulingApp(null)}>CANCEL</button>
+                                <button type="submit" className="btn-primary" style={{ flex: 1, padding: '0.8rem' }}>CONFIRM SCHEDULE</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
+};
+
+const labelStyle = {
+    fontSize: '0.65rem',
+    fontWeight: '850',
+    color: 'var(--text-muted)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+    marginBottom: '0.3rem',
+    display: 'block'
+};
+
+const inputStyle = {
+    width: '100%',
+    padding: '0.75rem',
+    borderRadius: '8px',
+    border: '1px solid #e2e8f0',
+    fontSize: '0.9rem',
+    outline: 'none'
 };
 
 export default RecruiterDashboard;

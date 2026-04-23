@@ -5,17 +5,19 @@ import { useAuth } from '../../context/AuthContext';
 import TimelineComponent from '../../components/TimelineComponent';
 import ApplicationJourney from './ApplicationJourney';
 import NOCViewer from '../documents/NOCViewer';
+import CompletionLetterViewer from '../../components/CompletionLetterViewer';
 
 // ── Internship status badge ──────────────────────────────────────────────────
 const statusBadge = (status) => {
     const s = status?.toUpperCase() || 'APPLIED';
     const map = {
-        'PENDING APPROVAL': { background: '#fef3c7', color: '#d97706' },
+        'PENDING_APPROVAL': { background: '#fef3c7', color: '#d97706' },
         'APPROVED': { background: '#d1fae5', color: '#059669' },
-        'IN PROGRESS': { background: '#dbeafe', color: '#2563eb' },
+        'IN_PROGRESS': { background: '#dbeafe', color: '#2563eb' },
         'COMPLETED': { background: '#d1fae5', color: '#047857' },
         'REJECTED': { background: '#fee2e2', color: '#dc2626' },
         'APPLIED': { background: '#e2e8f0', color: '#475569' },
+        'SELECTED': { background: '#eff6ff', color: '#2563eb' },
     };
     return map[s] || map['APPLIED'];
 };
@@ -47,6 +49,7 @@ const InternshipDashboard = () => {
     const [historyModal, setHistoryModal] = useState({ show: false, history: [] });
     const [alertModal, setAlertModal] = useState({ show: false, success: true, message: '' });
     const [nocModal, setNocModal] = useState({ show: false, data: null });
+    const [certModal, setCertModal] = useState({ show: false, data: null });
     const { user } = useAuth();
     const navigate = useNavigate();
 
@@ -99,7 +102,7 @@ const InternshipDashboard = () => {
             const res = await api.get('/opportunity/student-feed');
             // Filter for internship type (case insensitive to be safe)
             const opps = (res.data.data || []).filter(o => 
-                (o.type || '').toLowerCase() === 'internship'
+                (o.type || '').toUpperCase() === 'INTERNSHIP'
             );
             setAvailableOpps(opps);
         } catch (err) {
@@ -174,11 +177,11 @@ const InternshipDashboard = () => {
     const totalInternships = internships.length;
     const pendingCount = internships.filter(i => {
         const s = (i.internshipStatus || i.status || '').toUpperCase();
-        return s === 'PENDING APPROVAL';
+        return s === 'PENDING_APPROVAL';
     }).length;
     const activeCount = internships.filter(i => {
         const s = (i.internshipStatus || i.status || '').toUpperCase();
-        return ['APPROVED', 'IN PROGRESS'].includes(s);
+        return ['APPROVED', 'IN_PROGRESS'].includes(s);
     }).length;
     const completedCount = internships.filter(i => {
         const s = (i.internshipStatus || i.status || '').toUpperCase();
@@ -379,7 +382,7 @@ const InternshipDashboard = () => {
                                     const currentStatus = (intern.internshipStatus || intern.status || 'APPLIED').toUpperCase();
                                     const badge = statusBadge(currentStatus);
                                     const source = intern.internshipSource || 'College';
-                                    const canAddProgress = ['APPROVED', 'IN PROGRESS'].includes(currentStatus);
+                                    const canAddProgress = ['APPROVED', 'IN_PROGRESS'].includes(currentStatus);
 
                                     return (
                                         <tr key={intern._id}>
@@ -389,8 +392,8 @@ const InternshipDashboard = () => {
                                                 <span style={{
                                                     fontSize: '0.65rem', fontWeight: '800', padding: '3px 8px',
                                                     borderRadius: '4px', letterSpacing: '0.5px',
-                                                    background: source === 'External' ? '#fef3c7' : '#dbeafe',
-                                                    color: source === 'External' ? '#d97706' : '#2563eb',
+                                                    background: source.toUpperCase() === 'EXTERNAL' ? '#fef3c7' : '#dbeafe',
+                                                    color: source.toUpperCase() === 'EXTERNAL' ? '#d97706' : '#2563eb',
                                                 }}>{source.toUpperCase()}</span>
                                             </td>
                                             <td style={{ color: 'var(--text-muted)', fontWeight: '600', fontSize: '0.85rem' }}>
@@ -437,14 +440,37 @@ const InternshipDashboard = () => {
                                                         REQUEST APPROVAL
                                                     </button>
                                                 )}
-                                                {(currentStatus === 'COMPLETED' || intern.finalStatus === 'Approved') && (
-                                                    <button
-                                                        className="btn-primary"
-                                                        style={{ padding: '0.35rem 0.8rem', fontSize: '0.7rem', fontWeight: '800', borderRadius: '8px', background: 'var(--primary)' }}
-                                                        onClick={() => handleViewNOC(intern._id)}
-                                                    >
-                                                        📜 VIEW NOC
-                                                    </button>
+                                                {(currentStatus === 'COMPLETED' || intern.finalStatus?.toUpperCase() === 'APPROVED') && (
+                                                    <div style={{ display: 'flex', gap: '0.4rem' }}>
+                                                        <button
+                                                            className="btn-primary"
+                                                            style={{ padding: '0.35rem 0.8rem', fontSize: '0.7rem', fontWeight: '800', borderRadius: '8px', background: 'var(--primary)' }}
+                                                            onClick={() => handleViewNOC(intern._id)}
+                                                        >
+                                                            📜 NOC
+                                                        </button>
+                                                        {currentStatus === 'COMPLETED' && (
+                                                            <button
+                                                                className="btn-primary"
+                                                                style={{ padding: '0.35rem 0.8rem', fontSize: '0.7rem', fontWeight: '800', borderRadius: '8px', background: '#059669' }}
+                                                                onClick={() => setCertModal({
+                                                                    show: true,
+                                                                    data: {
+                                                                        studentName: user.name,
+                                                                        rollNumber: profile?.rollNumber || 'N/A',
+                                                                        department: profile?.department || 'N/A',
+                                                                        companyName: company,
+                                                                        role: role,
+                                                                        duration: intern.duration,
+                                                                        startDate: intern.startDate,
+                                                                        endDate: intern.endDate
+                                                                    }
+                                                                })}
+                                                            >
+                                                                🏆 CERTIFICATE
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 )}
                                             </td>
                                         </tr>
@@ -509,7 +535,7 @@ const InternshipDashboard = () => {
                                     approvalFlow={intern.approvalFlow} 
                                 />
                                 
-                                {intern.finalStatus === 'Approved' && (
+                                {intern.finalStatus?.toUpperCase() === 'APPROVED' && (
                                      <div style={{ marginTop: '2rem', padding: '1rem', background: '#d1fae540', borderRadius: '12px', border: '1px solid #10b98140', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                         <div style={{ fontSize: '1.5rem' }}>🏆</div>
                                         <div>
@@ -626,6 +652,17 @@ const InternshipDashboard = () => {
                         <div className="noc-printable">
                             <NOCViewer data={nocModal.data} />
                         </div>
+                    </div>
+                </div>
+            )}
+            {/* ══ Certificate View Modal ═══════════════════════════════════════════════ */}
+            {certModal.show && (
+                <div className="modal-overlay" style={{ background: 'rgba(0,0,0,0.85)', padding: '2rem' }} onClick={() => setCertModal({ show: false, data: null })}>
+                    <div style={{ maxWidth: '900px', width: '100%', maxHeight: '95vh', overflowY: 'auto', background: 'white', borderRadius: '8px', padding: '1rem' }} onClick={e => e.stopPropagation()}>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginBottom: '1rem' }}>
+                            <button onClick={() => setCertModal({ show: false, data: null })} className="btn-outline" style={{ padding: '8px 20px' }}>✕ CLOSE</button>
+                        </div>
+                        <CompletionLetterViewer data={certModal.data} />
                     </div>
                 </div>
             )}

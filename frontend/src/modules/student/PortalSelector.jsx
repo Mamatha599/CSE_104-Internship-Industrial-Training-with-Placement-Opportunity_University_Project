@@ -27,7 +27,7 @@ const PortalSelector = () => {
             </div>
 
             {/* Portal Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem' }}>
+            <div className="portal-selector-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem' }}>
 
                 {/* Placement Portal Card */}
                 <div

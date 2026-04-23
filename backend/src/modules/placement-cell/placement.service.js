@@ -44,18 +44,32 @@ const getAllApplications = async () => {
 /**
  * Update the status of an application
  * @param {string} applicationId - ID of the application to update
- * @param {string} status - New status (Applied, Shortlisted, Selected, Rejected)
+ * @param {string} status - New status
+ * @param {string} userId - User ID who updated the status
  * @returns {Promise<Object>} - Updated application
  */
-const updateApplicationStatus = async (applicationId, status) => {
-    const validStatuses = ['APPLIED', 'SHORTLISTED', 'SELECTED', 'REJECTED', 'APPROVED', 'PENDING APPROVAL'];
-    if (!validStatuses.includes(status.toUpperCase())) {
+const updateApplicationStatus = async (applicationId, status, userId) => {
+    const validStatuses = ['APPLIED', 'SHORTLISTED', 'SELECTED', 'REJECTED', 'APPROVED', 'PENDING_APPROVAL', 'COMPLETED'];
+    const targetStatus = status.toUpperCase().replace(' ', '_');
+    
+    if (!validStatuses.includes(targetStatus)) {
         throw new Error('Invalid status value');
     }
 
+    const historyEntry = {
+        status: targetStatus,
+        updatedBy: userId,
+        updatedByModel: 'User',
+        remarks: 'Status updated by Placement Cell Admin',
+        timestamp: new Date()
+    };
+
     return await Application.findByIdAndUpdate(
         applicationId,
-        { status: status.toUpperCase() },
+        { 
+            $set: { status: targetStatus },
+            $push: { history: historyEntry }
+        },
         { new: true, runValidators: true }
     );
 };

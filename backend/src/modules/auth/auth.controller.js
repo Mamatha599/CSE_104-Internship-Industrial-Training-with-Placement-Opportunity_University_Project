@@ -58,10 +58,28 @@ const login = async (req, res, next) => {
             return res.status(401).json({ success: false, message: 'Invalid email or password' });
         }
 
-        // Fetch faculty designations if role is faculty/coord/hod/dean
-        const Faculty = require('../faculty/faculty.model');
-        const facultyProfile = await Faculty.findOne({ userId: user._id });
-        const designations = facultyProfile ? facultyProfile.designations : [];
+        // Fetch profile and designations
+        let name = 'AUTHORIZED INDIVIDUAL';
+        let designations = [user.role];
+
+        if (user.role === 'student') {
+            const studentService = require('../student/student.service');
+            const studentProfile = await studentService.ensureProfile(user._id, user.email);
+            if (studentProfile) name = studentProfile.name;
+        } else if (['faculty', 'coordinator', 'hod', 'dean'].includes(user.role)) {
+            const Faculty = require('../faculty/faculty.model');
+            const facultyProfile = await Faculty.findOne({ userId: user._id });
+            if (facultyProfile) {
+                name = facultyProfile.facultyName;
+                designations = facultyProfile.designations;
+            }
+        } else if (user.role === 'recruiter') {
+            const Recruiter = require('../recruiter/recruiter.model');
+            const recruiterProfile = await Recruiter.findOne({ userId: user._id });
+            if (recruiterProfile) name = recruiterProfile.companyName;
+        } else if (user.role === 'admin') {
+            name = 'Administrator';
+        }
 
         // Generate token with basic user info
         const token = generateToken(user);
@@ -74,6 +92,7 @@ const login = async (req, res, next) => {
                 id: user._id,
                 email: user.email,
                 role: user.role,
+                name,
                 designations: designations.length > 0 ? designations : [user.role]
             },
         });

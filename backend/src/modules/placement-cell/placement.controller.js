@@ -29,7 +29,7 @@ const updateApplicationStatus = async (req, res, next) => {
         const { id } = req.params;
         const { status } = req.body;
         
-        const updatedApplication = await placementService.updateApplicationStatus(id, status);
+        const updatedApplication = await placementService.updateApplicationStatus(id, status, req.user.id);
         
         if (!updatedApplication) {
             return res.status(404).json({
@@ -40,7 +40,7 @@ const updateApplicationStatus = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            message: `Application status updated to ${status}`,
+            message: `Application status updated to ${status.toUpperCase()}`,
             data: updatedApplication,
         });
     } catch (error) {

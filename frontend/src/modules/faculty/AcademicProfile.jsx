@@ -30,38 +30,37 @@ const AcademicProfile = () => {
     const designations = profile.designations || ['mentor'];
 
     return (
-        <div className="page-container" style={{ padding: '2.5rem', maxWidth: '1000px', margin: '0 auto' }}>
-            <header style={{ marginBottom: '3rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '2rem' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '2rem' }}>
-                    <div style={{ 
-                        width: '120px', height: '120px', borderRadius: '24px', 
-                        background: 'linear-gradient(135deg, var(--primary) 0%, #1e40af 100%)',
-                        display: 'flex', justifyContent: 'center', alignItems: 'center',
-                        color: '#fff', fontSize: '3rem', fontWeight: '900',
-                        boxShadow: '0 20px 25px -5px rgba(30, 64, 175, 0.2)'
-                    }}>
-                        {profile.facultyName.charAt(0)}
-                    </div>
-                    <div>
-                        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                            {designations.map(d => (
-                                <span key={d} style={{ 
-                                    background: 'var(--primary-subtle, #eff6ff)', color: 'var(--primary)', 
-                                    padding: '4px 12px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '900', letterSpacing: '0.5px' 
-                                }}>
-                                    {d.toUpperCase()}
-                                </span>
-                            ))}
-                        </div>
-                        <h1 style={{ fontSize: '2.75rem', fontWeight: '1000', color: 'var(--text-main)', marginBottom: '0.25rem', letterSpacing: '-1px' }}>
-                            {profile.facultyName?.toUpperCase()}
-                        </h1>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: '600' }}>
-                            Department of {profile.department}
-                        </p>
+        <div className="page-container" style={{ padding: '2.5rem', maxWidth: '1200px', margin: '0 auto' }}>
+            <div style={{ marginBottom: '2.5rem', borderBottom: '2px solid var(--primary)', paddingBottom: '1.25rem' }}>
+                <h1 style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--primary)', letterSpacing: '-0.5px', textTransform: 'uppercase', marginBottom: '0.25rem' }}>OFFICIAL ACADEMIC PROFILE</h1>
+                <p style={{ color: 'var(--text-muted)', fontWeight: '800', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Institutional Leadership & Faculty Credentials</p>
+            </div>
+
+            <div className="linways-profile-banner" style={{ marginBottom: '2.5rem' }}>
+                <div className="linways-avatar-container">
+                    <div className="linways-avatar-inner" style={{ background: 'linear-gradient(135deg, var(--primary) 0%, #1e40af 100%)' }}>
+                        {profile?.facultyName?.charAt(0) || 'F'}
                     </div>
                 </div>
-            </header>
+                <div className="linways-profile-details">
+                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                        {designations.map(d => (
+                            <span key={d} style={{ 
+                                background: 'rgba(255,255,255,0.2)', color: '#fff', 
+                                padding: '2px 10px', borderRadius: '4px', fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.5px' 
+                            }}>
+                                {d.toUpperCase()}
+                            </span>
+                        ))}
+                    </div>
+                    <h2 style={{ fontSize: '2.25rem', marginBottom: '0.5rem' }}>{profile.facultyName?.toUpperCase()}</h2>
+                    <div style={{ display: 'flex', gap: '2rem', opacity: 0.9, fontSize: '0.95rem', flexWrap: 'wrap' }}>
+                        <p><strong>DEPARTMENT:</strong>&nbsp;{profile.department?.toUpperCase()}</p>
+                        <p><strong>OFFICIAL EMAIL:</strong>&nbsp;{profile.email}</p>
+                        <p><strong>OFFICE:</strong>&nbsp;Main Building, Room 402</p>
+                    </div>
+                </div>
+            </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '2.5rem' }}>
                 {/* Main Info */}
